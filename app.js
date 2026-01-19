@@ -13,6 +13,7 @@ app.use('/api/admin', require('./routes/admin.routes'));
 app.use('/api/categories', require('./routes/category.routes'));
 app.use('/api/reviews', require('./routes/review.routes'));
 app.use('/api/carts', require('./routes/cart.routes'));
+app.use('/api/astro', require('./routes/astro.routes'));
 
 
 
