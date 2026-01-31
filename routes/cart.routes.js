@@ -13,10 +13,10 @@ const {
   clearCart
 } = require('../controller/cart.controller');
 
-router.post("/add", addToCart);
-router.get("/:userId", getCart);
-router.put("/update-quantity", updateQuantity);
-router.post("/remove-item", removeItem);
-router.post("/clear",clearCart);
+router.post("/add",auth, addToCart);
+router.get("/:userId", auth, getCart);
+router.put("/update-quantity", auth, updateQuantity);
+router.post("/remove-item",auth, removeItem);
+router.post("/clear",auth,clearCart);
 
 module.exports = router;

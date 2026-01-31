@@ -1,20 +1,25 @@
 const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema({
-  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-  name: { type: String, required: true },
-  price: { type: Number, required: true },
-  quantity: { type: Number, required: true },
-  total: { type: Number, required: true } // price * quantity
+ productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product",required:true },
+      name: String,
+      price: Number,
+      updatedprice:Number,
+      image: String,
+      feature:String,
+      variantType:String,
+      variantSize: String,
+      quantity: { type: Number, default: 1 }
 });
 
 const addressSchema = new mongoose.Schema({
   name: { type: String, required: true },
   street: { type: String, required: true },
-  city: { type: String, required: true },
+  city: { type: String },
   pinCode: { type: String, required: true },
   state: { type: String },
-  country: { type: String, default: 'India' }
+  country: { type: String, default: 'India' },
+  phone:{type:Number,required:true}
 });
 
 const orderSchema = new mongoose.Schema(
@@ -32,3 +37,4 @@ const orderSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model('Order', orderSchema);
+ 

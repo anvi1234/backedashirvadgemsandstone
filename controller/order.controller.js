@@ -1,6 +1,7 @@
 const Order = require('../models/order');
 const razorpayInstance = require('../config/razorpay');
 const crypto = require('crypto');
+const mongoose = require('mongoose');
 
 /**
  * CREATE RAZORPAY ORDER
@@ -29,7 +30,7 @@ exports.createRazorpayOrder = async (req, res) => {
  */
 exports.verifyPayment = async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, items, totalAmount, address } = req.body;
+    const {userId, razorpay_order_id, razorpay_payment_id, razorpay_signature, items, totalAmount, address } = req.body;
 
     // 1️⃣ Validate Razorpay signature
     const sign = razorpay_order_id + '|' + razorpay_payment_id;
@@ -44,13 +45,12 @@ exports.verifyPayment = async (req, res) => {
     // 2️⃣ Save order
     const order = await Order.create({
       userId: req.user.id, // from auth middleware
-      items: items.map(i => ({
-        productId: i.productId,
-        name: i.name,
-        price: i.price,
-        quantity: i.quantity,
-        total: i.price * i.quantity
-      })),
+    items: items.map(i => ({
+  ...i, // keep everything else exactly the same
+  productId: i.productId
+    ? new mongoose.Types.ObjectId(i.productId)
+    : null
+})),
       totalAmount,
       paymentId: razorpay_payment_id,
       razorpayOrderId: razorpay_order_id,
@@ -69,8 +69,22 @@ exports.verifyPayment = async (req, res) => {
  * USER ORDER HISTORY
  */
 exports.getUserOrders = async (req, res) => {
-  const orders = await Order.find({ userId: req.user.id }).sort({ createdAt: -1 });
-  res.json(orders);
+  try {
+    const userId = req.user.id;
+
+   const orders = await Order.find({ userId })
+  .populate({
+    path: 'items.productId',
+    select: 'name mainImage'
+  })
+  .sort({ createdAt: -1 })
+  .exec();
+
+    res.status(200).json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch orders' });
+  }
 };
 
 /**
