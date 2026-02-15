@@ -18,6 +18,7 @@ const addressSchema = new mongoose.Schema({
   city: { type: String },
   pinCode: { type: String, required: true },
   state: { type: String },
+  city:{type:String,  required: true},
   country: { type: String, default: 'India' },
   phone:{type:Number,required:true}
 });
@@ -28,13 +29,23 @@ const orderSchema = new mongoose.Schema(
     items: { type: [orderItemSchema], required: true },
     totalAmount: { type: Number, required: true },
     paymentId: { type: String },
+    paymentMode:{type:String},
     razorpayOrderId: { type: String },
     paymentStatus: { type: String, enum: ['PENDING', 'PAID', 'FAILED'], default: 'PENDING' },
     orderStatus: { type: String, enum: ['PLACED', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'], default: 'PLACED' },
-    address: { type: addressSchema, required: true }
+    address: { type: addressSchema, required: true },
+    shipment: {
+    shiprocketOrderId: String,
+    shipmentId: String,
+    awbCode: String,
+    courierName: String,
+    trackingUrl: String,
+    trackingData: Object
+  }
   },
   { timestamps: true }
 );
+
 
 module.exports = mongoose.model('Order', orderSchema);
  
