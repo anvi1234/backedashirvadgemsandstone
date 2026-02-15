@@ -52,6 +52,7 @@ exports.verifyPayment = async (req, res) => {
     : null
 })),
       totalAmount,
+       paymentMode: 'ONLINE',
       paymentId: razorpay_payment_id,
       razorpayOrderId: razorpay_order_id,
       paymentStatus: 'PAID',
@@ -93,4 +94,42 @@ exports.getUserOrders = async (req, res) => {
 exports.getAllOrders = async (req, res) => {
   const orders = await Order.find().sort({ createdAt: -1 });
   res.json(orders);
+};
+
+exports.createCODOrder = async (req, res) => {
+
+  try {
+
+    const { items, totalAmount, address } = req.body;
+
+    const order = await Order.create({
+
+      userId: req.user.id,
+
+      items: items.map(i => ({
+        ...i,
+        productId: i.productId
+          ? new mongoose.Types.ObjectId(i.productId)
+          : null
+      })),
+
+      totalAmount,
+      paymentMode: 'COD',
+      paymentStatus: 'PENDING',
+      orderStatus: 'PLACED',
+      address
+
+    });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'COD Order placed successfully',
+      order
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+
 };
