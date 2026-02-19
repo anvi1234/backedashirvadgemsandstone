@@ -39,6 +39,38 @@ const upload = multer({
   }
 });
 
+/* Review Image Storage */
+
+const reviewStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => ({
+    folder: "reviews", // ⭐ separate folder
+    format: "webp",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [
+      {
+        width: 600,
+        height: 600,
+        crop: "fill",
+        quality: "auto"
+      }
+    ]
+  })
+});
+
+const uploadReviewImage = multer({
+  storage: reviewStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image")) {
+      return cb(new Error("Only image files allowed"), false);
+    }
+    cb(null, true);
+  }
+}).array("images", 5); // ⭐ multiple files
+
+
+
 /* Upload Fields Middleware */
 const uploadProductImages = upload.fields([
   { name: "mainImage", maxCount: 1 },
@@ -46,5 +78,6 @@ const uploadProductImages = upload.fields([
 ]);
 
 module.exports = {
-  uploadProductImages
+  uploadProductImages,
+  uploadReviewImage
 };

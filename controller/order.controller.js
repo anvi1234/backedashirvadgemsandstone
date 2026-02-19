@@ -71,20 +71,46 @@ exports.verifyPayment = async (req, res) => {
  */
 exports.getUserOrders = async (req, res) => {
   try {
+
     const userId = req.user.id;
 
-   const orders = await Order.find({ userId })
-  .populate({
-    path: 'items.productId',
-    select: 'name mainImage'
-  })
-  .sort({ createdAt: -1 })
-  .exec();
+    const orders = await Order.find({ userId })
+      .populate({
+        path: 'items.productId',
+        select: 'name mainImage reviews'
+      })
+      .sort({ createdAt: -1 })
+      .lean(); // ⭐ VERY IMPORTANT for modifying response
 
-    res.status(200).json(orders);
+    // Attach user review per item
+    const updatedOrders = orders.map(order => {
+
+      order.items = order.items.map(item => {
+
+        const product = item.productId;
+
+        if (product && product.reviews) {
+
+          const userReview = product.reviews.find(
+            r => r.userId?.toString() === userId
+          );
+
+          item.userReview = userReview || null;
+        }
+
+        return item;
+      });
+
+      return order;
+    });
+
+    res.status(200).json(updatedOrders);
+
   } catch (err) {
+
     console.error(err);
     res.status(500).json({ message: 'Failed to fetch orders' });
+
   }
 };
 
