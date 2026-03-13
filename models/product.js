@@ -89,7 +89,39 @@ const ProductSchema = new mongoose.Schema({
   ratingAverage: { type: Number, default: 0 },
   ratingCount: { type: Number, default: 0 },
   inStock: { type: Boolean, default: true },
-  extraBadges: [String],          // e.g. ["Blessed by Lord Murugan"]
+  extraBadges: [String], 
+  seo: {
+    metaTitle: String,
+
+    metaDescription: String,
+
+    metaKeywords: [String],
+
+    canonicalUrl: String,
+
+    robots: {
+      type: String,
+      default: "index, follow"
+    }
+  },
+
+
+  /* =====================
+     SOCIAL MEDIA SEO
+  ====================== */
+
+  openGraph: {
+    title: String,
+
+    description: String,
+
+    image: String,
+
+    type: {
+      type: String,
+      default: "product"
+    }
+  },         // e.g. ["Blessed by Lord Murugan"]
   createdAt: { type: Date, default: Date.now },
   updatedAt: Date,
   meta: mongoose.Schema.Types.Mixed // for arbitrary extra data (offers, delivery info)

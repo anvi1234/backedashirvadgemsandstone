@@ -15,6 +15,7 @@ app.use('/api/reviews', require('./routes/review.routes'));
 app.use('/api/carts', require('./routes/cart.routes'));
 app.use('/api/astro', require('./routes/astro.routes'));
 app.use('/api/ship', require('./routes/shipment.route'));
+app.use('/api/banner', require('./routes/banner.routes'));
 
 
 module.exports = app;

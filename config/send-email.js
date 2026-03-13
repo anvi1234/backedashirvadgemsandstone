@@ -11,9 +11,9 @@ const transporter = nodemailer.createTransport({
 exports.sendOtpEmail = async (to, otp) => {
   try {
     await transporter.sendMail({
-      from: `"Ashirwad Gems & Stones" <${process.env.EMAIL_USER}>`,
+      from: `"Ashirwad Rudraksh & GemStones" <${process.env.EMAIL_USER}>`,
       to,
-      subject: 'Verify Your Email - Ashirwad Rudraksh & Gems',
+      subject: 'Verify Your Email - Ashirwad Rudraksh & GemStones',
       html: `
       <div style="max-width:600px;margin:auto;font-family:Arial;border:1px solid #eee">
         
@@ -43,11 +43,11 @@ exports.sendOtpEmail = async (to, otp) => {
 
           <br />
           <p>Regards,<br/>
-          <b>Ashirwad Gems & Stones Team</b></p>
+          <b>Ashirwad Gems & GemStones Team</b></p>
         </div>
 
         <div style="background:#f5f5f5;padding:10px;text-align:center;font-size:12px;color:#666">
-          © ${new Date().getFullYear()} Ashirwad Gems & Stones. All rights reserved.
+          © ${new Date().getFullYear()} Ashirwad Gems & GemStones. All rights reserved.
         </div>
 
       </div>

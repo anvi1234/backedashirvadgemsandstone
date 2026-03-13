@@ -70,8 +70,32 @@ const uploadReviewImage = multer({
 }).array("images", 5); // ⭐ multiple files
 
 
-
-/* Upload Fields Middleware */
+const bannerStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => ({
+    folder: "banners", // separate folder
+    format: "webp",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [
+      {
+        width: 1920,
+        height: 600,
+        crop: "fill",
+        quality: "auto"
+      }
+    ]
+  })
+});
+const uploadBannerImage = multer({
+  storage: bannerStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image")) {
+      return cb(new Error("Only image files allowed"), false);
+    }
+    cb(null, true);
+  }
+}).single("image"); 
 const uploadProductImages = upload.fields([
   { name: "mainImage", maxCount: 1 },
   { name: "images", maxCount: 6 }
@@ -79,5 +103,6 @@ const uploadProductImages = upload.fields([
 
 module.exports = {
   uploadProductImages,
-  uploadReviewImage
+  uploadReviewImage,
+  uploadBannerImage
 };

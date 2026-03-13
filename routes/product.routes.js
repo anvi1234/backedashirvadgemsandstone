@@ -17,6 +17,7 @@ const {
 
 router.get('/', getProducts);
 router.get('/getProduct/:slug', getProductsByCategorySlug);
+router.get('/getProductBySlug/:slug', getProductBySlug);
 router.post('/create-product', uploadProductImages, createProduct);
 // router.post('/create-product', auth, admin, uploadProductImages, createProduct);
 // router.put('/:id', auth, admin, updateProduct);

@@ -1,6 +1,11 @@
 const Product = require('../models/product');
 const slugify = require('slugify');
 const cloudinary = require('../config/cloudinary');
+const {
+  generateSlug,
+  generateSEO,
+  generateOpenGraph
+} = require("../utils/seoGenerator");
 
 exports.createProduct = async (req, res) => {
   try {
@@ -71,13 +76,31 @@ exports.createProduct = async (req, res) => {
     const finalPrice = price - (price * discount) / 100;
 
     /* =====================
+       Auto SEO Generation
+    ====================== */
+ const slug = generateSlug(name);
+
+const seo = generateSEO({
+  name,
+  slug,
+  shortDescription
+});
+
+const openGraph = generateOpenGraph({
+  name,
+  shortDescription,
+  mainImage
+});
+
+
+    /* =====================
        Create Product
     ====================== */
     const product = await Product.create({
       name,
       subtitle,
       shortDescription,
-      slug: slugify(name, { lower: true, strict: true }),
+      slug: slug,
 
       price,
       discount,
@@ -92,7 +115,8 @@ exports.createProduct = async (req, res) => {
       images,
 
       features,
-      sections
+      seo,
+      openGraph
     });
 
     res.status(201).json({
@@ -213,16 +237,18 @@ exports.updateProduct = async (req, res) => {
     ];
 
     fields.forEach(field => {
-      console.log("req.body[field",req.body[field])
       if (req.body[field] !== undefined) {
         product[field] = req.body[field];
       }
     });
 
     if (req.body.name) {
-      product.slug = slugify(req.body.name, { lower: true, strict: true });
+      product.slug =  generateSlug(req.body.name);
     }
 
+    product.seo = generateSEO(product);
+
+    product.openGraph = generateOpenGraph(product);
     /* =====================
        PRICE CALCULATION
     ====================== */
@@ -296,6 +322,41 @@ if (req.body.features) {
 if (req.body.sections) {
   product.sections = parseIfString(req.body.sections);
 }
+ /* =====================
+       AUTO SEO UPDATE
+    ====================== */
+
+    const productName = product.name;
+    const slug = product.slug;
+
+    product.seo = {
+      metaTitle: `${productName} Price in India | Buy Online`,
+      metaDescription:
+        product.shortDescription ||
+        `Buy ${productName} at best price in India.`,
+      metaKeywords: [
+        productName,
+        `${productName} price`,
+        `buy ${productName}`,
+        `${productName} online`,
+        `${productName} best price`
+      ],
+      canonicalUrl: `https://ashirwadrudrakshandgems.com/product/${slug}`,
+      robots: "index, follow"
+    };
+
+    /* =====================
+       OPEN GRAPH UPDATE
+    ====================== */
+
+    product.openGraph = {
+      title: productName,
+      description:
+        product.shortDescription ||
+        `Buy ${productName} online at best price`,
+      image: product.mainImage?.url || "",
+      type: "product"
+    };
     await product.save();
 
     res.json({ success: true, product });
