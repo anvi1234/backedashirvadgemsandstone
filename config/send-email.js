@@ -13,7 +13,7 @@ exports.sendOtpEmail = async (to, otp) => {
     await transporter.sendMail({
       from: `"Ashirwad Rudraksh & GemStones" <${process.env.EMAIL_USER}>`,
       to,
-      subject: 'Verify Your Email - Ashirwad Rudraksh & GemStones',
+      subject: 'Verify Your Email - Ashirwad Rudraksh & Gems',
       html: `
       <div style="max-width:600px;margin:auto;font-family:Arial;border:1px solid #eee">
         

@@ -29,6 +29,7 @@ exports.createRazorpayOrder = async (req, res) => {
  * VERIFY PAYMENT & SAVE ORDER
  */
 exports.verifyPayment = async (req, res) => {
+  console.log("verify payenttt===")
   try {
     const {userId, razorpay_order_id, razorpay_payment_id, razorpay_signature, items, totalAmount, address } = req.body;
 
