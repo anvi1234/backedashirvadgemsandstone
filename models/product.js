@@ -89,6 +89,9 @@ const ProductSchema = new mongoose.Schema({
   ratingAverage: { type: Number, default: 0 },
   ratingCount: { type: Number, default: 0 },
   inStock: { type: Boolean, default: true },
+  stock:Number,
+  isBestSeller: { type: Boolean, default: false },
+  isTopFeature: { type: Boolean, default: false },
   extraBadges: [String], 
   seo: {
     metaTitle: String,

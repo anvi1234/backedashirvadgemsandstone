@@ -8,6 +8,7 @@ const {
 } = require("../utils/seoGenerator");
 
 exports.createProduct = async (req, res) => {
+  let inStock = true;
   try {
     const {
       name,
@@ -18,9 +19,17 @@ exports.createProduct = async (req, res) => {
       category,
       stock = 1,
       isActive = true,
-      ratings = 0
+      ratings = 0,
+      isTopFeature,
+      isBestSeller
     } = req.body;
 
+    if(stock > 0){
+      inStock = true;
+    }
+    else{
+      inStock = false
+    }
     if (!name || !category || !price) {
       return res.status(400).json({
         message: "Required fields missing"
@@ -108,6 +117,9 @@ const openGraph = generateOpenGraph({
 
       category,
       stock,
+      inStock,
+      isBestSeller,
+      isTopFeature,
       isActive,
       ratings,
 
@@ -233,7 +245,9 @@ exports.updateProduct = async (req, res) => {
       'category',
       'stock',
       'isActive',
-      'ratings'
+      'ratings',
+     'isTopFeature',
+      'isBestSeller'
     ];
 
     fields.forEach(field => {
@@ -246,6 +260,12 @@ exports.updateProduct = async (req, res) => {
       product.slug =  generateSlug(req.body.name);
     }
 
+    if(product.stock>0){
+      product.inStock = true
+    }
+    else{
+       product.inStock = false
+    }
     product.seo = generateSEO(product);
 
     product.openGraph = generateOpenGraph(product);
