@@ -8,7 +8,7 @@ async function getShiprocketToken() {
       "https://apiv2.shiprocket.in/v1/external/auth/login",
       {
         email: "ashirvadrudrakshgemsship@gmail.com",
-        password: "Y6c3Bqn^FHwY%K8#jVgpHULPks^#N7Ou",
+        password: "t$X7^*pkXU8utmOjHmrYx%iYd0#hafZI",
       }
     );
 
