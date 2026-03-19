@@ -12,28 +12,37 @@ cloudinary.config({
 /* Storage with 600x600 transform */
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => ({
-    folder: "products",
-    format: "webp",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
-    transformation: [
-      {
-        width: 600,
-        height: 600,
-        crop: "fill",
-        quality: "auto"
-      }
-    ]
-  })
+  params: async (req, file) => {
+    const isVideo = file.mimetype.startsWith("video"); // ✅ declare variable here
+
+    return {
+      folder: "products",
+      resource_type: isVideo ? "video" : "image",
+      format: isVideo ? undefined : "webp", // keep video format, use webp for images
+      allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4", "mov", "avi"],
+      transformation: isVideo
+        ? [] // no transformation for video
+        : [
+            {
+              width: 600,
+              height: 600,
+              crop: "fill",
+              quality: "auto"
+            }
+          ]
+    };
+  }
 });
+
 
 /* Multer instance */
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image")) {
-      cb(new Error("Only image files are allowed"), false);
+    if ( !file.mimetype.startsWith("image") &&
+  !file.mimetype.startsWith("video")) {
+      cb(new Error("Only image files and video are allowed"), false);
     }
     cb(null, true);
   }
@@ -41,28 +50,37 @@ const upload = multer({
 
 /* Review Image Storage */
 
+
 const reviewStorage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => ({
-    folder: "reviews", // ⭐ separate folder
-    format: "webp",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
-    transformation: [
-      {
-        width: 600,
-        height: 600,
-        crop: "fill",
-        quality: "auto"
-      }
-    ]
-  })
+  params: async (req, file) => {
+    const isVideo = file.mimetype.startsWith("video"); // ✅ declare variable here
+
+    return {
+      folder: "reviews",
+      resource_type: isVideo ? "video" : "image",
+      format: isVideo ? undefined : "webp", // keep video format, use webp for images
+      allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4", "mov", "avi"],
+      transformation: isVideo
+        ? [] // no transformation for video
+        : [
+            {
+              width: 600,
+              height: 600,
+              crop: "fill",
+              quality: "auto"
+            }
+          ]
+    };
+  }
 });
 
 const uploadReviewImage = multer({
   storage: reviewStorage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image")) {
+    if ( !file.mimetype.startsWith("image") &&
+  !file.mimetype.startsWith("video")) {
       return cb(new Error("Only image files allowed"), false);
     }
     cb(null, true);

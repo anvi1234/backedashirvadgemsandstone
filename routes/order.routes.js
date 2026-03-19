@@ -14,7 +14,7 @@ const {
 router.post('/create-payment', auth,createRazorpayOrder);
 router.post('/verify-payment',auth, verifyPayment);
 router.get('/my-orders', auth, getUserOrders);
-router.get('/admin/orders', auth, admin, getAllOrders);
+router.get('/orders', auth, admin, getAllOrders);
 router.post('/create-cod-order', auth, createCODOrder);
 
 module.exports = router;

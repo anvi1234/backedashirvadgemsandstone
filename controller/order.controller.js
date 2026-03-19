@@ -2,6 +2,8 @@ const Order = require('../models/order');
 const razorpayInstance = require('../config/razorpay');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
+const sendWhatsAppMerchant = require('../utils/sendWhatsappMerchant');
+const sendWhatsApp = require('../utils/sendsms');
 
 /**
  * CREATE RAZORPAY ORDER
@@ -59,6 +61,36 @@ exports.verifyPayment = async (req, res) => {
       paymentStatus: 'PAID',
       address
     });
+      try {
+  if (address?.phone) {
+    const phone = address.phone.replace('+91', '');
+    const productList = items
+      .map(p => `${p.name} (₹${p.price})`)
+      .join('\n');
+    const variables = [
+      req.user.name || 'Customer',   // {{1}}
+     getOrderId(order._id),          // {{2}}
+      productList,                   // {{3}}
+      totalAmount.toString(),        // {{4}}
+      'ONLINE',                      // {{5}}
+      'Ashirwad Rudraksha & Gems.'                 // {{6}} (add dot to avoid error)
+    ];
+
+    await sendWhatsApp(phone, variables);
+
+     const merchantVariables = [
+      'Admin',                      // {{1}} Merchant name
+      getOrderId(order._id),       // {{2}} Order ID
+      productList,                 // {{3}} Products
+      totalAmount.toString(),      // {{4}} Amount
+      'ONLINE'                     // {{5}} Payment
+    ];
+
+    await sendWhatsAppMerchant(merchantVariables);
+  }
+} catch (err) {
+  console.error('WhatsApp failed:', err.message);
+}
 
     res.status(201).json({ status: 'success', message: 'Order placed successfully', order });
   } catch (error) {
@@ -66,6 +98,12 @@ exports.verifyPayment = async (req, res) => {
     res.status(500).json({ status: 'fail', message: error.message });
   }
 };
+
+const getOrderId = (id) => {
+  return 'Order_' + id.toString().slice(-6);
+};
+
+// after order is created
 
 /**
  * USER ORDER HISTORY
@@ -147,6 +185,37 @@ exports.createCODOrder = async (req, res) => {
       address
 
     });
+
+     try {
+  if (address?.phone) {
+    const phone = address.phone.replace('+91', '');
+    const productList = items
+      .map(p => `${p.name} (₹${p.price})`)
+      .join('\n');
+    const variables = [
+      req.user.name || 'Customer',   // {{1}}
+     getOrderId(order._id),          // {{2}}
+      productList,                   // {{3}}
+      totalAmount.toString(),        // {{4}}
+      'COD',                      // {{5}}
+      'Ashirwad Rudraksha & Gems.'                 // {{6}} (add dot to avoid error)
+    ];
+
+    await sendWhatsApp(phone, variables);
+     const merchantVariables = [
+      'Admin',                      // {{1}} Merchant name
+      getOrderId(order._id),       // {{2}} Order ID
+      productList,                 // {{3}} Products
+      totalAmount.toString(),      // {{4}} Amount
+      'COD'                     // {{5}} Payment
+    ];
+
+    await sendWhatsAppMerchant(merchantVariables);
+  }
+} catch (err) {
+  console.error('WhatsApp failed:', err.message);
+}
+
 
     res.status(201).json({
       status: 'success',

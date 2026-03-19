@@ -3,26 +3,37 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { sendOtpEmail } = require('../config/send-email');
 const sendToken = require('../config/sendToken');
-
+const sendWhatsAppOtp = require('../utils/sendWhatsappOtp');
 /**
  * REGISTER WITH EMAIL OTP
  */
 exports.register = async (req, res) => {
   const { name, email, password, phone } = req.body;
+  const cleanPhone = phone.replace('+91', '');
+  const existing = await User.findOne({
+    $or: [{ email }, { phone: cleanPhone }]
+  });
 
-  const existing = await User.findOne({ email });
   if (existing) {
-    return res.status(400).json({ message: 'User already exists' });
+    if (existing.email === email) {
+      return res.status(400).json({ message: 'Email already exists' });
+    }
+    if (existing.phone === cleanPhone) {
+      return res.status(400).json({ message: 'Phone number already exists' });
+    }
   }
+   const hashedPassword = ''
+if(password){
+   hashedPassword = await bcrypt.hash(password, 10);
+}
 
-  const hashedPassword = await bcrypt.hash(password, 10);
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
   await User.create({
     name,
     email,
-    phone,
-    password: hashedPassword,
+    phone: cleanPhone, // ✅ always save clean phone
+    password: hashedPassword ?? '',
     emailOtp: otp,
     emailOtpExpires: Date.now() + 10 * 60 * 1000
   });
@@ -33,7 +44,6 @@ exports.register = async (req, res) => {
     message: 'OTP sent to email'
   });
 };
-
 
 /**
  * VERIFY EMAIL OTP
@@ -141,6 +151,70 @@ exports.resendEmailOtp = async (req, res) => {
 
     res.json({ message: 'OTP resent successfully' });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+exports.sendLoginOtpMobile = async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone)
+      return res.status(400).json({ message: 'Phone number is required' });
+
+    const cleanPhone = phone.replace('+91', '');
+
+    const user = await User.findOne({ phone: cleanPhone });
+
+    if (!user)
+      return res.status(400).json({ message: 'User not found' });
+
+    // ✅ Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // ✅ Save OTP
+    user.loginOtp = otp;
+    user.loginOtpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+    await user.save();
+
+    // ✅ Send WhatsApp OTP
+    await sendWhatsAppOtp(cleanPhone, otp);
+
+    res.json({ message: 'OTP sent to WhatsApp' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.verifyLoginOtpMobile = async (req, res) => {
+  try {
+    const { phone, otp } = req.body;
+
+    const cleanPhone = phone.replace('+91', '');
+
+    const user = await User.findOne({ phone: cleanPhone });
+
+    if (!user)
+      return res.status(400).json({ message: 'User not found' });
+
+    if (
+      user.loginOtp !== otp ||
+      user.loginOtpExpires < Date.now()
+    ) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    // ✅ Clear OTP
+    user.loginOtp = null;
+    user.loginOtpExpires = null;
+    await user.save();
+
+    // ✅ Login user (JWT)
+    sendToken(res, user);
+
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };

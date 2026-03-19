@@ -77,7 +77,8 @@ const ProductSchema = new mongoose.Schema({
   images: [
     {
       url: String,
-      public_id: String
+      public_id: String,
+       type: { type: String, enum: ['image', 'video'], default: 'image' }
     }
   ], // max 6   
   //           // array of image URLs

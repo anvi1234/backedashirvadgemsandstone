@@ -69,7 +69,8 @@ exports.createProduct = async (req, res) => {
     const images = req.files?.images
       ? req.files.images.map(file => ({
           url: file.path,
-          public_id: file.filename
+          public_id: file.filename,
+           type: file.mimetype.startsWith('video') ? 'video' : 'image'
         }))
       : [];
 
