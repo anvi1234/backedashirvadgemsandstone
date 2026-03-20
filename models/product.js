@@ -26,7 +26,7 @@ const SectionSchema = new mongoose.Schema({
 const VariantSchema = new mongoose.Schema({
   attribute: {
     type: String,
-    enum: ['Size', 'Weight', 'Type'],
+    enum: [],
     required: true
   },
   value: {
