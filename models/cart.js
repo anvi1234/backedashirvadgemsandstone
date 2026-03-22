@@ -12,6 +12,7 @@ const CartSchema = new mongoose.Schema({
       feature:String,
       variantType:String,
       variantSize: String,
+      slug: String,
       quantity: { type: Number, default: 1 }
     }
   ]
