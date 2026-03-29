@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'Phone number already exists' });
     }
   }
-   const hashedPassword = ''
+  let hashedPassword = ''
 if(password){
    hashedPassword = await bcrypt.hash(password, 10);
 }
