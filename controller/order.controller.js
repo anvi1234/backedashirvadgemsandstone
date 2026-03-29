@@ -122,7 +122,7 @@ exports.getUserOrders = async (req, res) => {
       .lean(); // ⭐ VERY IMPORTANT for modifying response
 
     // Attach user review per item
-    const updatedOrders = orders.map(order => {f
+    const updatedOrders = orders.map(order => {
 
       order.items = order.items.map(item => {
 
