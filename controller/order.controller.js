@@ -55,7 +55,7 @@ exports.verifyPayment = async (req, res) => {
     : null
 })),
       totalAmount,
-       paymentMode: 'ONLINE',
+       paymentMode: 'Prepaid',
       paymentId: razorpay_payment_id,
       razorpayOrderId: razorpay_order_id,
       paymentStatus: 'PAID',
@@ -72,7 +72,7 @@ exports.verifyPayment = async (req, res) => {
      getOrderId(order._id),          // {{2}}
       productList,                   // {{3}}
       totalAmount.toString(),        // {{4}}
-      'ONLINE',                      // {{5}}
+      'Prepaid',                      // {{5}}
       'Ashirwad Rudraksha & Gems.'                 // {{6}} (add dot to avoid error)
     ];
 
@@ -83,7 +83,7 @@ exports.verifyPayment = async (req, res) => {
       getOrderId(order._id),       // {{2}} Order ID
       productList,                 // {{3}} Products
       totalAmount.toString(),      // {{4}} Amount
-      'ONLINE'                     // {{5}} Payment
+      'Prepaid'                     // {{5}} Payment
     ];
 
     await sendWhatsAppMerchant(merchantVariables);
@@ -122,7 +122,7 @@ exports.getUserOrders = async (req, res) => {
       .lean(); // ⭐ VERY IMPORTANT for modifying response
 
     // Attach user review per item
-    const updatedOrders = orders.map(order => {
+    const updatedOrders = orders.map(order => {f
 
       order.items = order.items.map(item => {
 
