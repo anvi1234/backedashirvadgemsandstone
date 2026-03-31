@@ -22,3 +22,7 @@ const sendWhatsAppOtp = async (phone, otp) => {
 };
 
 module.exports = sendWhatsAppOtp;
+
+
+
+

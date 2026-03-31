@@ -11,14 +11,13 @@ exports.register = async (req, res) => {
   const { name, email, password, phone } = req.body;
   const cleanPhone = phone.replace('+91', '');
   const existing = await User.findOne({
-    $or: [{ email }, { phone: cleanPhone }]
+    $or: [{ email },{ phone: cleanPhone }]
   });
 
   if (existing) {
-    if (existing.email === email) {
+     if (existing.email === email) {
       return res.status(400).json({ message: 'Email already exists' });
-    }
-    if (existing.phone === cleanPhone) {
+    }    if (existing.phone === cleanPhone) {
       return res.status(400).json({ message: 'Phone number already exists' });
     }
   }
@@ -34,39 +33,39 @@ if(password){
     email,
     phone: cleanPhone, // ✅ always save clean phone
     password: hashedPassword ?? '',
-    emailOtp: otp,
-    emailOtpExpires: Date.now() + 10 * 60 * 1000
+    phoneOtp: otp,
+    phoneOtpExpires: Date.now() + 10 * 60 * 1000
   });
 
-  await sendOtpEmail(email, otp, 'Email Verification');
+  await sendWhatsAppOtp(cleanPhone, otp);
 
   res.status(201).json({
-    message: 'OTP sent to email'
+    message: 'OTP sent to WhatsApp'
   });
 };
 
 /**
  * VERIFY EMAIL OTP
  */
-exports.verifyEmailOtp = async (req, res) => {
-  const { email, otp } = req.body;
+exports.verifyPhoneOtp = async (req, res) => {
+  const { phone, otp } = req.body;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ phone });
   if (!user) return res.status(400).json({ message: 'User not found' });
 
   if (
-    user.emailOtp !== otp ||
-    user.emailOtpExpires < Date.now()
+    user.phoneOtp !== otp ||
+   user.phoneOtpExpires < Date.now()
   ) {
     return res.status(400).json({ message: 'Invalid or expired OTP' });
   }
 
-  user.isEmailVerified = true;
-  user.emailOtp = null;
-  user.emailOtpExpires = null;
+  user.isPhoneVerified = true;
+  user.phoneOtp = null;
+  user.phoneOtp = null;
   await user.save();
 
-  res.json({ message: 'Email verified successfully' });
+  res.json({ message: 'Phone Number verified successfully' });
 };
 
 
@@ -130,30 +129,31 @@ exports.verifyLoginOtp = async (req, res) => {
 /**
  * RESEND EMAIL OTP
  */
-exports.resendEmailOtp = async (req, res) => {
+exports.resendPhoneOtp = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { phone } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ phone });
     if (!user)
       return res.status(404).json({ message: 'User not found' });
 
-    if (user.isEmailVerified)
-      return res.status(400).json({ message: 'Email already verified' });
+    if (user.isPhoneVerified)
+      return res.status(400).json({ message: 'Phone Number already verified' });
 
-    const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const phoneOtp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    user.emailOtp = emailOtp;
-    user.emailOtpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+    user.phoneOtp = phoneOtp;
+    user.phoneOtpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
     await user.save();
 
-    await sendOtpEmail(email, emailOtp);
+    await sendWhatsAppOtp(phone, phoneOtp);
 
     res.json({ message: 'OTP resent successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 exports.sendLoginOtpMobile = async (req, res) => {
   try {
     const { phone } = req.body;
