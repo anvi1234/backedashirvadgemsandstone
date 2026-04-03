@@ -160,35 +160,38 @@ exports.resendPhoneOtp = async (req, res) => {
 
 exports.sendLoginOtpMobile = async (req, res) => {
   try {
+    console.log("API HIT");
+
     const { phone } = req.body;
+    console.log("PHONE:", phone);
 
     if (!phone)
       return res.status(400).json({ message: 'Phone number is required' });
 
     const cleanPhone = phone.replace('+91', '');
+    console.log("CLEAN PHONE:", cleanPhone);
 
     const user = await User.findOne({ phone: cleanPhone });
 
     if (!user)
       return res.status(400).json({ message: 'User not found' });
 
-    // ✅ Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log("OTP:", otp);
 
-    // ✅ Save OTP
     user.loginOtp = otp;
-    user.loginOtpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+    user.loginOtpExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    // ✅ Send WhatsApp OTP
- sendWhatsAppOtp(cleanPhone, otp).catch(err => {
-  console.error('WhatsApp OTP failed:', err);
-});
+    // ✅ IMPORTANT: await this
+    const result = await sendWhatsAppOtp(cleanPhone, otp);
+
+    console.log("WHATSAPP RESPONSE:", result);
 
     res.json({ message: 'OTP sent to WhatsApp' });
 
   } catch (error) {
-    console.error(error);
+    console.error("ERROR:", error.response?.data || error.message);
     res.status(500).json({ message: error.message });
   }
 };
