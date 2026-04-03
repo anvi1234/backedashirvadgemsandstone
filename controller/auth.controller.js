@@ -177,7 +177,9 @@ exports.sendLoginOtpMobile = async (req, res) => {
     await user.save();
 
     // ✅ Send WhatsApp OTP
-    await sendWhatsAppOtp(cleanPhone, otp);
+ sendWhatsAppOtp(cleanPhone, otp).catch(err => {
+  console.error('WhatsApp OTP failed:', err);
+});
 
     res.json({ message: 'OTP sent to WhatsApp' });
 
