@@ -3,7 +3,17 @@ const cors = require('cors');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:4200',
+    'https://ashirwadrudrakshandgems.com' // your frontend domain
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// ✅ Handle preflight requests explicitly
+app.options('*', cors());
 app.use(express.json());
 
 app.use('/api/auth', require('./routes/auth.routes'));
