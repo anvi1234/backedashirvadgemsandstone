@@ -13,7 +13,7 @@ app.use(cors({
 }));
 
 // ✅ Handle preflight requests explicitly
-app.options('*', cors());
+
 app.use(express.json());
 
 app.use('/api/auth', require('./routes/auth.routes'));
