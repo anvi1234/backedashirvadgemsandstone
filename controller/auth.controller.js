@@ -8,42 +8,63 @@ const sendWhatsAppOtp = require('../utils/sendWhatsappOtp');
  * REGISTER WITH EMAIL OTP
  */
 exports.register = async (req, res) => {
-  const { name, email, password, phone } = req.body;
-  const cleanPhone = phone.replace('+91', '');
-  const existing = await User.findOne({
-    $or: [{ email },{ phone: cleanPhone }]
-  });
+  try {
+    console.log("REGISTER API HIT");
 
-  if (existing) {
-     if (existing.email === email) {
-      return res.status(400).json({ message: 'Email already exists' });
-    }    if (existing.phone === cleanPhone) {
-      return res.status(400).json({ message: 'Phone number already exists' });
+    const { name, email, password, phone } = req.body;
+    console.log("INPUT:", { name, email, phone });
+
+    const cleanPhone = phone.replace('+91', '');
+    console.log("CLEAN PHONE:", cleanPhone);
+
+    const existing = await User.findOne({
+      $or: [{ email }, { phone: cleanPhone }]
+    });
+
+    if (existing) {
+      if (existing.email === email) {
+        return res.status(400).json({ message: 'Email already exists' });
+      }
+      if (existing.phone === cleanPhone) {
+        return res.status(400).json({ message: 'Phone number already exists' });
+      }
     }
+
+    let hashedPassword = '';
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log("OTP:", otp);
+
+    const user = await User.create({
+      name,
+      email,
+      phone: cleanPhone,
+      password: hashedPassword ?? '',
+      phoneOtp: otp,
+      phoneOtpExpires: Date.now() + 10 * 60 * 1000
+    });
+
+    console.log("USER CREATED:", user._id);
+
+    // ✅ IMPORTANT: await WhatsApp API
+    const result = await sendWhatsAppOtp(cleanPhone, otp);
+
+    console.log("WHATSAPP REGISTER RESPONSE:", result);
+
+    res.status(201).json({
+      message: 'OTP sent to WhatsApp'
+    });
+
+  } catch (error) {
+    console.error("REGISTER ERROR:", error.response?.data || error.message);
+
+    res.status(500).json({
+      message: error.response?.data?.message || error.message
+    });
   }
-  let hashedPassword = ''
-if(password){
-   hashedPassword = await bcrypt.hash(password, 10);
-}
-
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-  await User.create({
-    name,
-    email,
-    phone: cleanPhone, // ✅ always save clean phone
-    password: hashedPassword ?? '',
-    phoneOtp: otp,
-    phoneOtpExpires: Date.now() + 10 * 60 * 1000
-  });
- sendWhatsAppOtp(cleanPhone, otp).catch(err => {
-  console.error('WhatsApp OTP failed:', err);
-});
-
-
-  res.status(201).json({
-    message: 'OTP sent to WhatsApp'
-  });
 };
 
 /**
@@ -133,7 +154,10 @@ exports.verifyLoginOtp = async (req, res) => {
  */
 exports.resendPhoneOtp = async (req, res) => {
   try {
+    console.log("RESEND OTP API HIT");
+
     const { phone } = req.body;
+    console.log("PHONE:", phone);
 
     const user = await User.findOne({ phone });
     if (!user)
@@ -143,21 +167,27 @@ exports.resendPhoneOtp = async (req, res) => {
       return res.status(400).json({ message: 'Phone Number already verified' });
 
     const phoneOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log("NEW OTP:", phoneOtp);
 
     user.phoneOtp = phoneOtp;
-    user.phoneOtpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+    user.phoneOtpExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
- sendWhatsAppOtp(phone, phoneOtp).catch(err => {
-  console.error('WhatsApp OTP failed:', err);
-});
-   
+
+    // ✅ IMPORTANT: await this
+    const result = await sendWhatsAppOtp(phone, phoneOtp);
+
+    console.log("WHATSAPP RESEND RESPONSE:", result);
 
     res.json({ message: 'OTP resent successfully' });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("RESEND OTP ERROR:", error.response?.data || error.message);
+
+    res.status(500).json({
+      message: error.response?.data?.message || error.message
+    });
   }
 };
-
 exports.sendLoginOtpMobile = async (req, res) => {
   try {
     console.log("API HIT");
