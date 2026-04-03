@@ -36,8 +36,10 @@ if(password){
     phoneOtp: otp,
     phoneOtpExpires: Date.now() + 10 * 60 * 1000
   });
+ sendWhatsAppOtp(cleanPhone, otp).catch(err => {
+  console.error('WhatsApp OTP failed:', err);
+});
 
-  await sendWhatsAppOtp(cleanPhone, otp);
 
   res.status(201).json({
     message: 'OTP sent to WhatsApp'
@@ -145,8 +147,10 @@ exports.resendPhoneOtp = async (req, res) => {
     user.phoneOtp = phoneOtp;
     user.phoneOtpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
     await user.save();
-
-    await sendWhatsAppOtp(phone, phoneOtp);
+ sendWhatsAppOtp(phone, phoneOtp).catch(err => {
+  console.error('WhatsApp OTP failed:', err);
+});
+   
 
     res.json({ message: 'OTP resent successfully' });
   } catch (error) {
