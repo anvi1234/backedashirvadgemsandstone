@@ -362,7 +362,7 @@ if (req.body.sections) {
         `${productName} online`,
         `${productName} best price`
       ],
-      canonicalUrl: `https://ashirwadrudrakshandgems.com/product/${slug}`,
+      canonicalUrl: `https://ashirwadrudrakshandgem.com/product/${slug}`,
       robots: "index, follow"
     };
 

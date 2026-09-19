@@ -23,7 +23,7 @@ function generateSEO(product) {
 
   const cleanDescription = stripHtml(product.shortDescription || "");
 
-  const domain = process.env.FRONTEND_URL || "https://ashirwadrudrakshandgems.com";
+  const domain = process.env.FRONTEND_URL || "https://ashirwadrudrakshandgem.com";
 
   const metaDescription =
     cleanDescription.length > 160

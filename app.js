@@ -6,7 +6,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:4200',
-    'https://ashirwadrudrakshandgems.com' // your frontend domain
+    'https://ashirwadrudrakshandgem.com' // your frontend domain
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
